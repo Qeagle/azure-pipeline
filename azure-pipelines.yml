@@ -46,6 +46,6 @@ steps:
       # Find and kill the process occupying port 80
       sudo fuser -k 80/tcp || true
 
-      # Start the Leafhub application
-      sudo java -jar $(Build.ArtifactStagingDirectory)/leafhub.jar
+      # Start the Leafhub application as a nohup process
+      sudo nohup java -jar $(Build.ArtifactStagingDirectory)/leafhub.jar > leafhub.log 2>&1 &
     displayName: 'Kill port 80 process and Start the Leafhub application'
