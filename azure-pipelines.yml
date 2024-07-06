@@ -1,29 +1,51 @@
 trigger:
   - main
- 
+
 pool:
-  vmImage: 'Leafhub'
- 
+  name: 'Default'
+
 steps:
+  - script: |
+      echo "Cleaning up workspace"
+      sudo rm -rf /home/azureuser/myagent/_work/1/s/*
+      echo "Workspace cleaned"
+    displayName: 'Clean up workspace'
+
+  - checkout: self
+    clean: true
+
+  - script: |
+      export JAVA_HOME=/usr/lib/jvm/java-8-openjdk-amd64
+      export PATH=$JAVA_HOME/bin:$PATH
+      echo "JAVA_HOME is set to: $JAVA_HOME"
+      java -version
+    displayName: 'Set and Verify Java installation'
+
   - task: Maven@3
     inputs:
-      mavenPomFile: 'pom.xml'
+      mavenPomFile: 'leafhub/pom.xml'
       mavenOptions: '-Xmx3072m'
-      javaHomeOption: 'JDKVersion'
-      jdkVersionOption: '1.8'
-      jdkArchitectureOption: 'x64'
+      javaHomeOption: 'Path'
+      jdkDirectory: '/usr/lib/jvm/java-8-openjdk-amd64'
       publishJUnitResults: true
       testResultsFiles: '**/surefire-reports/TEST-*.xml'
       goals: 'package'
- 
- 
+
   - task: PublishBuildArtifacts@1
     inputs:
-      pathtoPublish: '$(System.DefaultWorkingDirectory)/target'  # Path to your artifact(s)
+      pathtoPublish: '$(System.DefaultWorkingDirectory)/leafhub/target'  # Path to your artifact(s)
       artifactName: 'Leafhub'  # Name of the artifact to publish
- 
+
   - task: CopyFiles@2
     inputs:
-      SourceFolder: '$(Build.SourcesDirectory)/target'
+      SourceFolder: '$(Build.SourcesDirectory)/leafhub/target'
       Contents: '**/*.jar'
       TargetFolder: '$(Build.ArtifactStagingDirectory)'
+
+  - script: |
+      # Find and kill the process occupying port 80
+      sudo fuser -k 80/tcp || true
+
+      # Start the Leafhub application
+      sudo java -jar $(Build.ArtifactStagingDirectory)/leafhub.jar
+    displayName: 'Kill port 80 process and Start the Leafhub application'
