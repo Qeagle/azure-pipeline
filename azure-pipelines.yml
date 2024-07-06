@@ -6,6 +6,11 @@ pool:
 
 steps:
   - script: |
+      echo "Changing permissions for cleanup"
+      sudo chmod -R 777 /home/azureuser/myagent/_work/1/s/C:/EyemanageLogs
+    displayName: 'Change permissions for EyemanageLogs'
+
+  - script: |
       echo "Cleaning up workspace"
       sudo rm -rf /home/azureuser/myagent/_work/1/s/*
       echo "Workspace cleaned"
