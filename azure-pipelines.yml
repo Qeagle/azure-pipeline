@@ -6,8 +6,12 @@ pool:
 
 steps:
   - script: |
-      echo "Changing permissions for cleanup"
-      sudo chmod -R 777 /home/azureuser/myagent/_work/1/s/C:/EyemanageLogs
+      echo "Checking and changing permissions for cleanup"
+      if [ -d "/home/azureuser/myagent/_work/1/s/C:/EyemanageLogs" ]; then
+        sudo chmod -R 777 /home/azureuser/myagent/_work/1/s/C:/EyemanageLogs
+      else
+        echo "Directory /home/azureuser/myagent/_work/1/s/C:/EyemanageLogs does not exist"
+      fi
     displayName: 'Change permissions for EyemanageLogs'
 
   - script: |
